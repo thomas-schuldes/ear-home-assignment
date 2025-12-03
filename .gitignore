@@ -1,0 +1,28 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Logs
+*.log
+
+# OS / Misc
+.DS_Store
+Thumbs.db
+
+# Java Generated
+*.class
+
+# H2 DB Files (falls später extern)
+*.mv.db
+*.h2.db
