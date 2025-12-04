@@ -11,7 +11,7 @@ für die EAR-Entwicklungsaufgabe.
 - **DOC-03 – Architektur-Dokument.md**  
   Statische und dynamische Architekturbeschreibung des Systems.
 
-- **DOC-04 – ADR-001-persistence**  
+- **DOC-04 – ADR-001-persistence.md**  
   Architekturentscheidungen (Architecture Decision Records), beginnend mit ADR 001 zur Persistenz.
 
 - **DOC-05 – decision-sonarqube-vs-grafana.md**  
