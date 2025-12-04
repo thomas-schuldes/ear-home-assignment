@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+    <!-- Root logger definition -->
+    <Appenders>
+
+        <!-- Console output with colors -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%style{%d{yyyy-MM-dd HH:mm:ss.SSS}}{Bright,Blue} %highlight{%-5level} %style{%c{1}}{Bright,Green}: %msg%n"/>
+        </Console>
+
+    </Appenders>
+
+    <Loggers>
+
+        <!-- Reduce Spring / Hibernate noise -->
+        <Logger name="org.springframework" level="INFO"/>
+        <Logger name="org.hibernate" level="WARN"/>
+
+        <!-- Your package (falls du es verbose willst, hier DEBUG setzen) -->
+        <Logger name="de.ear" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- Root logger -->
+        <Root level="DEBUG">
+            <AppenderRef ref="Console"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>
