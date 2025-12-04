@@ -15,7 +15,9 @@ ear-home-assignment/
   backend/        # Spring Boot Backend (Java, REST, Persistenz, SOAP-Anbindung)
   frontend/       # Einfaches Web-Frontend (HTML/JS)
   docs/           # Tickets, Architektur, ADRs
-    TICKETS.md
-    ARCHITECTURE.md
-    ADR-001-persistence.md
+    DOC-01 – README.md
+    DOC-02 – TICKETS.md
+    DOC-03 – Architektur-Dokument.md
+    DOC-04 – ADR-001-persistence.md
+    DOC-05 – decision-sonarqube-vs-grafana.md
   README.md
