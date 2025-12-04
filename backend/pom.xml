@@ -28,6 +28,18 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Log4j2 als Logging-Backend für Spring Boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
         </dependency>
 
         <!-- JPA / DB -->
@@ -43,12 +55,50 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Bean Validation (für @Valid) -->
+        <!-- Bean Validation -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Apache CXF SOAP Runtime -->
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxws</artifactId>
+            <version>3.5.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-transports-http</artifactId>
+            <version>3.5.5</version>
+        </dependency>
+
+        <!-- JAXB API + Implementierung für javax.xml.bind.* (für die generierten SOAP-Klassen) -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>2.3.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.3.3</version>
+        </dependency>
+
+        <!-- JAX-WS API (für javax.xml.ws.* in den generierten SOAP-Klassen) -->
+        <dependency>
+            <groupId>javax.xml.ws</groupId>
+            <artifactId>jaxws-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
 
         <!-- Tests -->
         <dependency>
@@ -58,14 +108,42 @@
         </dependency>
     </dependencies>
 
-
-
     <build>
         <plugins>
             <!-- Spring Boot Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- SOAP Client Code Generator (CXF wsdl2java) -->
+            <plugin>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-codegen-plugin</artifactId>
+                <version>3.5.5</version>
+                <executions>
+                    <execution>
+                        <id>generate-soap-client</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <sourceRoot>${project.build.directory}/generated-sources/wsdl</sourceRoot>
+                            <wsdlOptions>
+                                <wsdlOption>
+                                    <wsdl>https://test.ear-system.de/ear-soap/v2/MitteilungsService?wsdl</wsdl>
+                                    <extraargs>
+                                        <extraarg>-p</extraarg>
+                                        <extraarg>http://www.ear-system.de/ear-soap/v2=de.ear.soap.generated</extraarg>
+                                        <extraarg>-b</extraarg>
+                                        <extraarg>${project.basedir}/src/main/resources/wsdl/binding.xml</extraarg>
+                                    </extraargs>
+                                </wsdlOption>
+                            </wsdlOptions>
+                        </configuration>
+                        <goals>
+                            <goal>wsdl2java</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

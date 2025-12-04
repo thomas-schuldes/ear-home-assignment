@@ -21,3 +21,6 @@ ear-home-assignment/
     DOC-04 – ADR-001-persistence.md
     DOC-05 – decision-sonarqube-vs-grafana.md
   README.md
+
+Die vollständige Aufgabenbeschreibung befindet sich unter:
+docs/reference/ear-assignment.pdf
