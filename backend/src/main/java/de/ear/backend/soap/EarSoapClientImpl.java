@@ -95,7 +95,7 @@ public class EarSoapClientImpl implements EarSoapClient {
                     return 101;
                 case "GROSS_GERAET":
                     return 102;
-                default: return 4010;
+                default: return 58;
             }
         }
         catch (NumberFormatException e) { return 0; }
