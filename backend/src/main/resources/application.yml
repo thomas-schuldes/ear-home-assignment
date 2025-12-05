@@ -17,3 +17,8 @@ spring:
     console:
       enabled: true
       path: /h2-console
+ear:
+  soap:
+    endpoint: https://test.ear-system.de/ear-soap/v2/MitteilungsService
+    username: test
+    password: test

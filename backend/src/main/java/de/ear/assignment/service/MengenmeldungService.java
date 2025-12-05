@@ -1,62 +1,81 @@
 package de.ear.assignment.service;
 
-import de.ear.assignment.dto.MengenmeldungCreateDto;
-import de.ear.assignment.dto.MengenmeldungResponseDto;
 import de.ear.assignment.model.Mengenmeldung;
 import de.ear.assignment.model.SubmissionStatus;
 import de.ear.assignment.repository.MengenmeldungRepository;
+import de.ear.backend.soap.EarSoapClient;
+import de.ear.backend.soap.SoapResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
 public class MengenmeldungService {
 
-    private final MengenmeldungRepository repository;
-    private final DateTimeFormatter DATE_FMT = DateTimeFormatter.ISO_LOCAL_DATE;
+    private static final Logger log = LoggerFactory.getLogger(MengenmeldungService.class);
 
-    public MengenmeldungService(MengenmeldungRepository repository) {
+    private final MengenmeldungRepository repository;
+    private final EarSoapClient earSoapClient;
+
+    public MengenmeldungService(MengenmeldungRepository repository,
+                                EarSoapClient earSoapClient) {
         this.repository = repository;
+        this.earSoapClient = earSoapClient;
     }
 
-    public MengenmeldungResponseDto submit(MengenmeldungCreateDto dto) {
-        LocalDate von = LocalDate.parse(dto.getZeitraumVon(), DATE_FMT);
-        LocalDate bis = LocalDate.parse(dto.getZeitraumBis(), DATE_FMT);
+    @Transactional
+    public Mengenmeldung createMengenmeldung(String herstellerId,
+                                             String kategorie,
+                                             BigDecimal menge,
+                                             LocalDate von,
+                                             LocalDate bis) {
 
-        Mengenmeldung entity = new Mengenmeldung(
-                dto.getHerstellerId(),
-                dto.getKategorie(),
-                dto.getMenge(),
+        Mengenmeldung mm = new Mengenmeldung(
+                herstellerId,
+                kategorie,
+                menge,
                 von,
                 bis,
                 SubmissionStatus.PENDING
         );
-
-        Mengenmeldung saved = repository.save(entity);
-
-        // TODO: später asynchronen SOAP-Aufruf triggern
-
-        return toResponse(saved);
+        Mengenmeldung saved = repository.save(mm);
+        log.info("Neue Mengenmeldung angelegt, id={}, status={}", saved.getId(), saved.getStatus());
+        return saved;
     }
 
-    public List<MengenmeldungResponseDto> getAll() {
-        return repository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
+    @Transactional
+    public void sendeMengenmeldung(Long id) {
+        Mengenmeldung mm = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Mengenmeldung nicht gefunden: " + id));
+
+        log.info("Starte SOAP-Versand für Mengenmeldung id={}, status={}", mm.getId(), mm.getStatus());
+
+        if (mm.getStatus() != SubmissionStatus.PENDING) {
+            log.warn("Mengenmeldung {} hat Status {} – wird nicht gesendet.", mm.getId(), mm.getStatus());
+            return;
+        }
+
+        SoapResult result = earSoapClient.submitIstInput(mm);
+
+        if (result.isSuccess()) {
+            mm.setStatus(SubmissionStatus.OK);
+            log.info("Mengenmeldung {} erfolgreich gesendet. SOAP code={}, message={}",
+                    mm.getId(), result.getCode(), result.getMessage());
+        } else {
+            mm.setStatus(SubmissionStatus.ERROR);
+            log.warn("Mengenmeldung {} FEHLER beim Senden. SOAP code={}, message={}",
+                    mm.getId(), result.getCode(), result.getMessage());
+        }
+
+        repository.save(mm);
     }
 
-    private MengenmeldungResponseDto toResponse(Mengenmeldung m) {
-        MengenmeldungResponseDto dto = new MengenmeldungResponseDto();
-        dto.setId(m.getId());
-        dto.setHerstellerId(m.getHerstellerId());
-        dto.setKategorie(m.getKategorie());
-        dto.setMenge(m.getMenge());
-        dto.setZeitraumVon(m.getZeitraumVon().toString());
-        dto.setZeitraumBis(m.getZeitraumBis().toString());
-        dto.setStatus(m.getStatus().name());
-        dto.setCreatedAt(m.getCreatedAt().toString());
-        return dto;
+    public List<Mengenmeldung> findAll() {
+        return repository.findAll();
     }
 }
