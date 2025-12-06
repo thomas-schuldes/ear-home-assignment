@@ -25,10 +25,13 @@ public class Mengenmeldung {
     @Enumerated(EnumType.STRING)
     private SubmissionStatus status;
 
-    private OffsetDateTime createdAt;
+    private final OffsetDateTime createdAt;
 
-    protected Mengenmeldung() {
+    private String soapResponseCode;
+
+    public Mengenmeldung() {
         // for JPA
+        this.createdAt = OffsetDateTime.now();
     }
 
     public Mengenmeldung(String herstellerId,
@@ -58,4 +61,37 @@ public class Mengenmeldung {
     public void setStatus(SubmissionStatus status) {
         this.status = status;
     }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setHerstellerId(String herstellerId) {
+        this.herstellerId = herstellerId;
+    }
+
+    public void setKategorie(String kategorie) {
+        this.kategorie = kategorie;
+    }
+
+    public void setZeitraumVon(LocalDate zeitraumVon) {
+        this.zeitraumVon = zeitraumVon;
+    }
+
+    public void setZeitraumBis(LocalDate zeitraumBis) {
+        this.zeitraumBis = zeitraumBis;
+    }
+
+    public void setMenge(BigDecimal menge) {
+        this.menge = menge;
+    }
+
+    public String getSoapResponseCode() {
+        return soapResponseCode;
+    }
+
+    public void setSoapResponseCode(String soapResponseCode) {
+        this.soapResponseCode = soapResponseCode;
+    }
+
 }

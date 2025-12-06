@@ -71,11 +71,35 @@ public class MengenmeldungService {
             log.warn("Mengenmeldung {} FEHLER beim Senden. SOAP code={}, message={}",
                     mm.getId(), result.getCode(), result.getMessage());
         }
-
+        mm.setSoapResponseCode(result.getCode());
         repository.save(mm);
     }
 
     public List<Mengenmeldung> findAll() {
         return repository.findAll();
     }
+
+    public void processPendingMeldungen() {
+        List<Mengenmeldung> pending = repository.findByStatus(SubmissionStatus.PENDING);
+
+        for (Mengenmeldung mm : pending) {
+            try {
+                SoapResult result = earSoapClient.submitIstInput(mm);
+
+                if (result.isSuccess()) {
+                    mm.setStatus(SubmissionStatus.OK);
+                } else {
+                    mm.setStatus(SubmissionStatus.ERROR);
+                }
+                mm.setSoapResponseCode(result.getCode());
+                repository.save(mm);
+
+            } catch (Exception e) {
+                // Fehlerbehandlung (optional Logging)
+                mm.setStatus(SubmissionStatus.ERROR);
+                repository.save(mm);
+            }
+        }
+    }
+
 }
