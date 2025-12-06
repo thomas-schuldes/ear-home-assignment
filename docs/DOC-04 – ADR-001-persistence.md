@@ -1,23 +1,90 @@
-# DOC-01 – Entscheidung Persistenztechnologie
+# DOC-04 – ADR-001-persistence.md
 
-## Kontext
-Das Backend muss Mengenmeldungen speichern und abrufen.  
-Für die Aufgabe genügt eine leichtgewichtige, schnelle Lösung ohne externe Infrastruktur.
+# Architecture Decision Record – Persistenztechnologie
 
-## Optionen
-- H2 (In-Memory oder File-basiert)
-- Postgres
-- SQLite
+## 1. Kontext
 
-## Entscheidung
-→ Für den Prototyp wird **H2** verwendet.
+Das Backend des EAR-Systems muss Mengenmeldungen zuverlässig **persistieren**, um:
 
-## Begründung
-- Keine Installation nötig
-- Sehr schnelle Startzeiten
-- Ideal für automatisierte Tests
-- JPA-basierter Wechsel zu Postgres später trivial
+* eine asynchrone Verarbeitung (PENDING → OK/ERROR) zu ermöglichen,
+* SOAP-Responses zu speichern,
+* Statusänderungen transparent und abrufbar zu halten,
+* und Lastspitzen abzufedern.
 
-## Konsequenzen
-- Nicht für Produktion gedacht
-- Bei Bedarf kann Postgres per Spring-Konfiguration aktiviert werden
+Für das Home Assignment soll eine leichtgewichtige, schnell einsetzbare Lösung verwendet werden, ohne externe Infrastruktur.
+
+---
+
+## 2. Optionen
+
+### **Option A – H2 (In-Memory oder File-basiert)**
+
+* Kein Setup notwendig
+* Extrem schnelle Startzeit
+* Perfekt für Tests & Prototypen
+* SQL kompatibel, unterstützt JPA
+
+### **Option B – PostgreSQL**
+
+* Produktionsreif
+* Stabil, weit verbreitet
+* Unterstützt starke Transaktionsmodelle
+* Benötigt Installation oder Docker
+
+### **Option C – SQLite**
+
+* File-basierte DB
+* Einfach einzusetzen
+* Gut für Embedded-Szenarien
+* Nicht ideal für komplexe JPA-Setups
+
+---
+
+## 3. Entscheidung
+
+✔ **Für den Prototyp wird H2 verwendet.**
+
+Damit ist die Persistenz sofort einsatzbereit, CI-fähig und ohne Zusatzinstallation verwendbar.
+
+---
+
+## 4. Begründung
+
+* Keine Infrastruktur nötig → schneller Einstieg
+* Optimal für automatisierte Tests (JUnit + H2)
+* Sehr geringe Startzeit
+* JPA-basierte Entities bleiben unverändert nutzbar
+* Wechsel zu PostgreSQL später problemlos möglich (nur `application.properties` ändern)
+
+---
+
+## 5. Konsequenzen
+
+### **Vorteile**
+
+* Entwicklerfreundlich
+* Testbar ohne externe Abhängigkeiten
+* Ideal für das Home Assignment
+
+### **Nachteile**
+
+* Nicht für produktive Nutzung geeignet
+* Concurrency & Storage begrenzt
+* SOAP-Lastszenarien nur eingeschränkt realistisch testbar
+
+### **Folgen für zukünftige Entwicklung**
+
+* Ein Umstieg auf PostgreSQL wird empfohlen, wenn:
+
+    * größere Datenmengen erwartet werden,
+    * mehrere Instanzen betrieben werden sollen,
+    * robuste Transaktionssicherheit notwendig ist.
+
+---
+
+## 6. Status
+
+**Status: Accepted**
+Datum: 2025-12-06
+
+Diese Entscheidung erfüllt die Anforderungen des Assignments und bildet eine solide Grundlage für Entwicklung & Tests.
